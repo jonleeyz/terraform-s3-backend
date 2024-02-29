@@ -26,3 +26,49 @@ data "aws_iam_policy_document" "terraform_s3_state_store_policy" {
     ]
   }
 }
+
+data "aws_iam_policy_document" "account_wide_terraform_support_policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "iam:CreateOpenIDConnectProvider",
+      "iam:DeleteOpenIDConnectProvider",
+    ]
+
+    resources = [
+      aws_iam_openid_connect_provider.github.arn
+    ]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "iam:CreateRole",
+      "iam:DeleteRole",
+      "iam:CreatePolicy",
+      "iam:DeletePolicy",
+      "iam:AttachRolePolicy",
+      "iam:DetachRolePolicy"
+    ]
+
+    resources = ["*"]
+  }
+}
+
+data "aws_iam_policy_document" "assume_account_wide_terraform_support_role" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+
+    condition {
+      test     = "StringLike"
+      variable = "${local.github_oidc_provider_url}:sub"
+      values = [
+        "repo:jonleeyz/terraform-backend:*",
+      ]
+    }
+
+    principals {
+      type        = "Federated"
+      identifiers = ["arn:aws:iam::574182556674:oidc-provider/${local.github_oidc_provider_url}"]
+    }
+  }
+}
