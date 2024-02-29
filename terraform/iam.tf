@@ -1,7 +1,7 @@
-resource "aws_iam_policy" "terraform_s3_state_store" {
-  name   = "terraformS3StateStorePolicy"
+resource "aws_iam_policy" "terraform_state_management" {
+  name   = "accountWideTerraformSupport_TerraformStateManagementPolicy"
   path   = "/"
-  policy = data.aws_iam_policy_document.terraform_s3_state_store_policy.json
+  policy = data.aws_iam_policy_document.terraform_state_management_policy.json
 
   lifecycle {
     prevent_destroy = true
@@ -18,7 +18,7 @@ resource "aws_iam_role" "account_wide_terraform_support" {
   name               = "accountWideTerraformSupportRole"
   assume_role_policy = data.aws_iam_policy_document.assume_account_wide_terraform_support_role.json
   managed_policy_arns = [
-    aws_iam_policy.terraform_s3_state_store.arn,
+    aws_iam_policy.terraform_state_management.arn,
     aws_iam_policy.account_wide_terraform_support.arn
   ]
 }
