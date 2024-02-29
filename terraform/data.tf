@@ -29,7 +29,28 @@ data "aws_iam_policy_document" "terraform_state_management_policy" {
   }
 }
 
-data "aws_iam_policy_document" "account_wide_terraform_support_policy" {
+data "aws_iam_policy_document" "workspace_infra_policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:ListBuckets",
+      "s3:CreateBucket",
+      "s3:DeleteBucket"
+    ]
+
+    resources = ["*"]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "dynamodb:ListTables",
+      "dynamodb:DescribeTable",
+      "dynamodb:CreateTable",
+      "dynamodb:DeleteTable"
+    ]
+
+    resources = ["*"]
+  }
   statement {
     effect = "Allow"
     actions = [
