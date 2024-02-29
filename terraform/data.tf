@@ -1,6 +1,6 @@
 data "aws_iam_policy_document" "terraform_state_management_policy" {
   statement {
-    effect = "Allow"
+    effect  = "Allow"
     actions = ["s3:ListBucket"]
 
     resources = [aws_s3_bucket.terraform_state_store.arn]
