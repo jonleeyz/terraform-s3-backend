@@ -1,5 +1,5 @@
 resource "aws_iam_openid_connect_provider" "github" {
-  url = "https://${local.github_oidc_provider_url}"
+  url = "https://${var.github_oidc_provider_url}"
   client_id_list = [
     "sts.amazonaws.com"
   ]
@@ -8,4 +8,8 @@ resource "aws_iam_openid_connect_provider" "github" {
   lifecycle {
     prevent_destroy = true
   }
+}
+
+output "github_iam_oidc_provider_arn" {
+  value = aws_iam_openid_connect_provider.github.arn
 }

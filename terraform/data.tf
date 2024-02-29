@@ -7,7 +7,7 @@ data "aws_iam_policy_document" "account_wide_terraform_support_policy" {
     ]
 
     resources = [
-      aws_iam_openid_connect_provider.github.arn
+      module.account_wide_supporting_infra.github_iam_oidc_provider_arn
     ]
   }
   statement {
