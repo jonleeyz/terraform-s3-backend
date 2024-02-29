@@ -9,11 +9,6 @@ terraform {
   }
 
   backend "s3" {
-    region = "ap-southeast-1"
-
-    bucket = "jl-terraform-remote-state-store"
-    key    = "account-wide-terraform-support/terraform.tfstate"
-
     dynamodb_table = "terraform_state_lock"
   }
 }
