@@ -1,11 +1,19 @@
 resource "aws_s3_bucket" "terraform_state_store" {
   bucket = "jl-terraform-remote-state-store"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_s3_bucket_versioning" "terraform_state_store" {
   bucket = aws_s3_bucket.terraform_state_store.id
   versioning_configuration {
     status = "Enabled"
+  }
+
+  lifecycle {
+    prevent_destroy = true
   }
 }
 
@@ -17,6 +25,10 @@ resource "aws_dynamodb_table" "terraform_state_lock" {
   attribute {
     name = "LockID"
     type = "S"
+  }
+
+  lifecycle {
+    prevent_destroy = true
   }
 }
 
