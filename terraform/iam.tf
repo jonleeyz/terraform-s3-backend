@@ -25,5 +25,5 @@ resource "aws_iam_role" "account_wide_terraform_support" {
 
 output "ci_iam_role_arn" {
   description = "The ARN of the IAM role that the repo's CI workflow will attempt to assume"
-  value = aws_iam_role.account_wide_terraform_support.arn
+  value       = aws_iam_role.account_wide_terraform_support.arn
 }
