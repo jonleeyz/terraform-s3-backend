@@ -7,7 +7,7 @@ data "aws_iam_policy_document" "account_wide_terraform_support_policy" {
     ]
 
     resources = [
-      module.account_wide_supporting_infra.github_iam_oidc_provider_arn
+      var.github_iam_oidc_provider_arn
     ]
   }
   statement {
@@ -31,7 +31,7 @@ data "aws_iam_policy_document" "assume_account_wide_terraform_support_role" {
 
     condition {
       test     = "StringLike"
-      variable = "${local.github_oidc_provider_url}:sub"
+      variable = "${var.github_oidc_provider_url}:sub"
       values = [
         "repo:jonleeyz/terraform-backend:*",
       ]
@@ -39,7 +39,7 @@ data "aws_iam_policy_document" "assume_account_wide_terraform_support_role" {
 
     principals {
       type        = "Federated"
-      identifiers = ["arn:aws:iam::574182556674:oidc-provider/${local.github_oidc_provider_url}"]
+      identifiers = ["arn:aws:iam::574182556674:oidc-provider/${var.github_oidc_provider_url}"]
     }
   }
 }
