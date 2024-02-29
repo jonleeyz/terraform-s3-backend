@@ -1,21 +1,23 @@
-data "aws_iam_policy_document" "terraform_s3_state_store_policy" {
+data "aws_iam_policy_document" "terraform_state_management_policy" {
   statement {
-    effect = "Allow"
-    actions = [
-      "s3:PutObject",
-      "s3:GetObject",
-      "s3:ListBucket"
-    ]
+    effect  = "Allow"
+    actions = ["s3:ListBucket"]
 
-    resources = [
-      aws_s3_bucket.terraform_state_store.arn,
-      "${aws_s3_bucket.terraform_state_store.arn}/*"
-    ]
+    resources = [aws_s3_bucket.terraform_state_store.arn]
   }
   statement {
     effect = "Allow"
     actions = [
-      "dynamodb:ListTables",
+      "s3:GetObject",
+      "s3:PutObject",
+    ]
+
+    resources = ["${aws_s3_bucket.terraform_state_store.arn}/${local.workspace_bucket_key}"]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "dynamodb:DescribeTable",
       "dynamodb:GetItem",
       "dynamodb:PutItem",
       "dynamodb:DeleteItem"
@@ -27,7 +29,28 @@ data "aws_iam_policy_document" "terraform_s3_state_store_policy" {
   }
 }
 
-data "aws_iam_policy_document" "account_wide_terraform_support_policy" {
+data "aws_iam_policy_document" "workspace_infra_policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:ListBuckets",
+      "s3:CreateBucket",
+      "s3:DeleteBucket"
+    ]
+
+    resources = ["*"]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "dynamodb:ListTables",
+      "dynamodb:DescribeTable",
+      "dynamodb:CreateTable",
+      "dynamodb:DeleteTable"
+    ]
+
+    resources = ["*"]
+  }
   statement {
     effect = "Allow"
     actions = [
