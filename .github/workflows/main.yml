@@ -56,35 +56,76 @@ jobs:
         if: github.event_name == 'pull_request'
         continue-on-error: true
 
-      - uses: actions/github-script@v6
+      - name: Report workflow output
+        uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
-        env:
-          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
-            <details><summary>Validation Output</summary>
+            let output = `### CI workflow: Terraform plan
+
+            Commit: ${{ github.sha }}
+            Pushed by: @${{ github.actor }}
+            Action: \`${{ github.event_name }}\`
+
+            ---
+
+            1. \`terraform fmt\`: ️ \`${{ steps.fmt.outcome }}\`
+            2. \`terraform init\`:  \`${{ steps.init.outcome }}\`
+            3. \`terraform validate\`:  \`${{ steps.validate.outcome }}\`
+            4. \`terraform plan\`:  \`${{ steps.plan.outcome }}\`
+
+            <details open><summary>Generated plan:</summary>
 
             \`\`\`\n
+            ${{ steps.plan.outputs.stdout }}
+            \`\`\`
+
+            </details>
+
+            ---
+
+            `;
+
+            output = output.replace(/success/g, "success ✅")
+            output = output.replace(/failure/g, "failure ❌")
+
+            const debugInfo = `### Debug information
+
+            <details><summary>terraform fmt:</summary>
+
+            \`\`\`
+            ${{ steps.fmt.outputs.stdout }}
+            \`\`\`
+           
+            </details>
+
+            \n
+
+            <details><summary>terraform init:</summary>
+
+            \`\`\`
+            ${{ steps.init.outputs.stdout }}
+            \`\`\`
+           
+            </details>
+
+            \n
+
+            <details><summary>terraform validate:</summary>
+
+            \`\`\`
             ${{ steps.validate.outputs.stdout }}
             \`\`\`
-
+           
             </details>
 
-            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            ---
+            Comment \`terraform plan\` to regenerate the plan.
+            Comment \`terraform apply\` to apply the generated plan.
+            `;
 
-            <details><summary>Show Plan</summary>
-
-            \`\`\`\n
-            ${process.env.PLAN}
-            \`\`\`
-
-            </details>
-
-            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+            output = output.concat(debugInfo)
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,
@@ -98,5 +139,5 @@ jobs:
         run: exit 1
 
       - name: terraform apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.plan.outcome == 'success'
         run: terraform apply -auto-approve -input=false
