@@ -1,18 +1,15 @@
-name: "Terraform action"
+name: "CI/CD: On PR creation"
 on:
-  push:
-    branches:
-      - main
   pull_request:
 permissions:
-      id-token: write       # This is required for aws oidc connection
+      id-token: write       # Required for AWS OIDC connection
       contents: read        # Required by actions/checkout
       pull-requests: write  # Required by GitHub bot to create comments on PRs
 env:
   TF_LOG: INFO
   AWS_REGION: ${{ secrets.AWS_REGION }}
 jobs:
-  deploy:
+  terraform-plan:
     runs-on: ubuntu-latest
     defaults:
       run:
