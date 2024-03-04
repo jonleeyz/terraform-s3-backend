@@ -1,0 +1,59 @@
+name: "CI/CD: On core branch push"
+on:
+  push:
+    branches:
+      - main
+      - develop
+permissions:
+      id-token: write       # Required for AWS OIDC connection
+      contents: read        # Required by actions/checkout
+env:
+  TF_LOG: INFO
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+jobs:
+  terraform-apply:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./terraform
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v3
+
+      - name: Assume CI AWS IAM role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: GitHub-OIDC-TERRAFORM
+
+      - name: Install Terraform CLI
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.0
+
+      - name: terraform fmt
+        id: fmt
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+
+      - name: terraform init
+        id: init
+        env:
+          AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
+          AWS_BUCKET_KEY_NAME: ${{ secrets.AWS_BUCKET_KEY_NAME }}
+        run: terraform init -backend-config="bucket=${AWS_BUCKET_NAME}" -backend-config="key=${AWS_BUCKET_KEY_NAME}" -backend-config="region=${AWS_REGION}"
+
+      - name: terraform validate
+        id: validate
+        run: terraform validate
+
+      - name: terraform plan
+        id: plan
+        run: terraform plan -input=false -out tf.plan
+
+      - name: terraform apply
+        id: apply
+        if: ${{ steps.plan.outcome }} == 'success'
+        run: terraform apply -auto-approve tf.plan
