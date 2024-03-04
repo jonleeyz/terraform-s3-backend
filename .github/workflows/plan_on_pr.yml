@@ -74,7 +74,7 @@ jobs:
 
             <details open><summary>Generated plan:</summary>
 
-            \`\`\`\n
+            \`\`\`
             ${{ steps.plan.outputs.stdout }}
             \`\`\`
 
