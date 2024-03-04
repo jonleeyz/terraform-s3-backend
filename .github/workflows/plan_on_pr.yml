@@ -130,3 +130,7 @@ jobs:
               repo: context.repo.repo,
               body: output
             })
+
+      - name: Approve PR on workflow success
+        if: steps.fmt.outcome == 'success' && steps.init.outcome == 'success' && steps.validate.outcome == 'success' && steps.plan.outcome == 'success'
+        uses: hmarr/auto-approve-action@v4
