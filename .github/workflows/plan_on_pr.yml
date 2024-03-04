@@ -133,11 +133,3 @@ jobs:
               repo: context.repo.repo,
               body: output
             })
-
-      - name: Fail early if terraform plan fails
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
-
-      - name: terraform apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && steps.plan.outcome == 'success'
-        run: terraform apply -auto-approve -input=false
