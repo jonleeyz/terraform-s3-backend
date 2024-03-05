@@ -49,7 +49,7 @@ output "terraform_state_lock_table_arn" {
 }
 
 output "oidc_iam_provider_arn" {
-  value       = aws_dynamodb_table.terraform_state_lock.arn
+  value       = aws_iam_openid_connect_provider.github.arn
   description = "The ARN of the provisioned OpenID Connect IAM Provider that will allow requests from GitHub to assume IAM roles"
 }
 
